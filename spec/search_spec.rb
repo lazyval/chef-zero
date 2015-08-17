@@ -5,7 +5,9 @@ describe ChefZero::Solr::SolrParser do
   let (:all_docs) do
     docs = []
     [{'foo' => 'a'},
-     {'foo' => 'd'}].each_with_index do |h, i|
+     {'foo' => 'd'},
+     {'foo' => 'f'},
+     {'foo' => 'f-e'}].each_with_index do |h, i|
       docs.push ChefZero::Solr::SolrDoc.new(h, i)
     end
     docs
@@ -24,9 +26,15 @@ describe ChefZero::Solr::SolrParser do
     search_for('foo:[a TO c]').size.should eq(1)
   end
 
+  it "handles dashed values in exact manner" do
+    search_for('foo:f-e').size.should eq(1)
+    search_for('foo:f*').size.should eq(2)
+    search_for('foo:f').size.should eq(1)
+  end
+
   it "handles wildcard ranges" do
     search_for('foo:[* TO c]').size.should eq(1)
     search_for('foo:[c TO *]').size.should eq(1)
-    search_for('foo:[* TO *]').size.should eq(2)
+    search_for('foo:[* TO *]').size.should eq(4)
   end
 end
